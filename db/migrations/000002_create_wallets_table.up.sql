@@ -1,0 +1,10 @@
+CREATE TABLE IF NOT EXISTS wallets (
+    public_key VARCHAR(32) PRIMARY KEY NOT NULL,
+    usr BIGINT NOT NULL,
+    balance NUMERIC(18, 2) DEFAULT 0.0,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT wallets_usr_fk FOREIGN KEY (usr) 
+        REFERENCES users(uid) 
+        ON DELETE CASCADE 
+        ON UPDATE CASCADE
+);
