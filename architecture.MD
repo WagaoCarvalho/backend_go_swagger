@@ -19,4 +19,3 @@ backend/
 └── go.mod
 
 
-routes

@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+type DefaultResponse struct {
+	Data   interface{} `json:"data"`
+	Status int         `json:"status"`
+}
+
 func ErrorResponse(w http.ResponseWriter, err error, status int) {
 	w.WriteHeader(status)
 	ToJson(w, struct {
