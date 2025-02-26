@@ -19,7 +19,6 @@ const (
 
 var dbPool *pgxpool.Pool
 
-// Connect cria uma conexão com o banco de dados PostgreSQL usando pgxpool
 func Connect() *pgxpool.Pool {
 	url := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s",
 		user, pass, host, port, dbName, sslMode)
@@ -40,7 +39,6 @@ func Connect() *pgxpool.Pool {
 	return dbPool
 }
 
-// TestConnection verifica se a conexão está funcionando corretamente
 func TestConnection() {
 	con := Connect()
 	defer con.Close()

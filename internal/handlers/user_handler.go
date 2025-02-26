@@ -3,23 +3,22 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/WagaoCarvalho/backendgoswagger/internal/models"
 	"github.com/WagaoCarvalho/backendgoswagger/internal/repositories"
 	"github.com/WagaoCarvalho/backendgoswagger/internal/utils"
+	"github.com/WagaoCarvalho/backendgoswagger/internal/validations"
+	"github.com/gorilla/mux"
 )
 
-// GetUsersHandler lida com a requisição de busca de todos os usuários
 func GetUsers(w http.ResponseWriter, r *http.Request) {
-	// Chama a função GetUsers no repositório
 	users, err := repositories.GetUsers()
 	if err != nil {
-		// Usando ErrorResponse para retornar um erro em formato JSON
 		utils.ErrorResponse(w, fmt.Errorf("erro ao buscar usuários: %w", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Converte os usuários para JSON e envia na resposta com status
 	response := utils.DefaultResponse{
 		Data:   users,
 		Status: http.StatusOK,
@@ -27,37 +26,60 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	utils.ToJson(w, response)
 }
 
-// PostUser lida com a requisição de criação de um novo usuário
-func PostUser(w http.ResponseWriter, r *http.Request) {
-	// Verifica o método HTTP
-	if r.Method != http.MethodPost {
+func GetUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
 		utils.ErrorResponse(w, fmt.Errorf("método %s não permitido", r.Method), http.StatusMethodNotAllowed)
 		return
 	}
 
-	// Cria uma instância de User para armazenar os dados
+	vars := mux.Vars(r)
+	uidParam := vars["id"]
+
+	uid, err := strconv.ParseInt(uidParam, 10, 64)
+	if err != nil {
+		utils.ErrorResponse(w, fmt.Errorf("ID inválido"), http.StatusBadRequest)
+		return
+	}
+
+	// Recupera o usuário com o ID
+	user, err := repositories.GetUser(uid)
+	if err != nil {
+		utils.ErrorResponse(w, err, http.StatusNotFound)
+		return
+	}
+
+	// Prepara a resposta
+	response := utils.DefaultResponse{
+		Data:   user,
+		Status: http.StatusOK,
+	}
+	utils.ToJson(w, response)
+}
+
+func PostUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		utils.ErrorResponse(w, fmt.Errorf("método %s não permitido", r.Method), http.StatusMethodNotAllowed)
+		return
+	}
 	var user models.User
 
-	// Decodifica o corpo da requisição JSON para a struct User
 	if err := utils.FromJson(r.Body, &user); err != nil {
 		utils.ErrorResponse(w, fmt.Errorf("erro ao decodificar JSON: %w", err), http.StatusBadRequest)
 		return
 	}
 
-	// Validação simples: garantir que os campos obrigatórios não estão vazios
-	if user.Nickname == "" || user.Email == "" || user.Password == "" {
-		utils.ErrorResponse(w, fmt.Errorf("nickname, email e password são obrigatórios"), http.StatusBadRequest)
+	user, err := validations.ValidateNewUser(user)
+	if err != nil {
+		utils.ErrorResponse(w, err, http.StatusUnprocessableEntity)
 		return
 	}
 
-	// Chama a função NewUser do repositório para inserir o novo usuário
 	success, err := repositories.NewUser(user)
 	if err != nil {
 		utils.ErrorResponse(w, fmt.Errorf("erro ao criar usuário: %w", err), http.StatusInternalServerError)
 		return
 	}
 
-	// Se a criação for bem-sucedida, retorna um status 201 Created
 	if success {
 		response := utils.DefaultResponse{
 			Data:   user,
@@ -67,4 +89,61 @@ func PostUser(w http.ResponseWriter, r *http.Request) {
 	} else {
 		utils.ErrorResponse(w, fmt.Errorf("erro desconhecido ao criar usuário"), http.StatusInternalServerError)
 	}
+}
+
+func PutUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		utils.ErrorResponse(w, fmt.Errorf("método %s não permitido", r.Method), http.StatusMethodNotAllowed)
+		return
+	}
+
+	vars := mux.Vars(r)
+	uidParam := vars["id"]
+
+	uid, err := strconv.ParseInt(uidParam, 10, 64)
+	if err != nil {
+		utils.ErrorResponse(w, fmt.Errorf("ID inválido"), http.StatusBadRequest)
+		return
+	}
+
+	var user models.User
+	if err := utils.FromJson(r.Body, &user); err != nil {
+		utils.ErrorResponse(w, fmt.Errorf("JSON inválido"), http.StatusBadRequest)
+		return
+	}
+
+	user.UID = uid
+	if err := repositories.UpdateUser(&user); err != nil {
+		utils.ErrorResponse(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	utils.ToJson(w, user)
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodDelete {
+		utils.ErrorResponse(w, fmt.Errorf("método %s não permitido", r.Method), http.StatusMethodNotAllowed)
+		return
+	}
+
+	vars := mux.Vars(r)
+	uidParam := vars["id"]
+
+	uid, err := strconv.ParseInt(uidParam, 10, 64)
+	if err != nil {
+		utils.ErrorResponse(w, fmt.Errorf("ID inválido"), http.StatusBadRequest)
+		return
+	}
+
+	if err := repositories.DeleteUser(uid); err != nil {
+		if err.Error() == "usuário não encontrado" {
+			utils.ErrorResponse(w, err, http.StatusNotFound)
+		} else {
+			utils.ErrorResponse(w, err, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

@@ -1,21 +1,21 @@
 backend/
 ├── cmd/
 │   └── http/
-│       ├── main.go               # Ponto de entrada da aplicação
+│       ├── main.go
 │       └── routes/
-│           └── routes.go         # Configuração das rotas
-├── internal/                     # Pacotes internos (não exportáveis)
-│   ├── handlers/                 # Lógica dos handlers (controladores)
+│           └── routes.go
+├── internal/
+│   ├── handlers/
 │   │    ├── user_handler.go
 │   │    └── home_handler.go
-│   ├── middlewares/              # Middlewares da aplicação
+│   ├── middlewares/
 │   │    └── auth_middleware.go
-│   ├── models/                   # Definição de modelos/entidades
+│   ├── models/
 │   │    └── user.go
-│   ├── repositories/             # Comunicação com o banco de dados
+│   ├── repositories/
 │   │    └── user_repository.go
-│   └── utils/                    # Utilitários e funções auxiliares
-│        └── hash.go
+│   ├── utils/
+│   │    └── hash.go
+│   └── validacoes/
+│        └── user_validation.go
 └── go.mod
-
-
