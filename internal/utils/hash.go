@@ -25,7 +25,11 @@ func (b BcryptHasher) HashPassword(password string) (string, error) {
 }
 
 // Compara uma senha com um hash armazenado
-func (b BcryptHasher) CheckPassword(password, hash string) bool {
+func (b BcryptHasher) CheckPasswordBool(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
+}
+
+func (b BcryptHasher) CheckPasswordErr(password, hash string) error {
+	return bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 }

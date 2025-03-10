@@ -39,7 +39,7 @@ func GetUsers() ([]models.User, error) {
 	return users, nil
 }
 
-func GetUser(uid int64) (models.User, error) {
+func GetUserById(uid int64) (models.User, error) {
 	db := Connect()
 	defer db.Close()
 
@@ -47,6 +47,33 @@ func GetUser(uid int64) (models.User, error) {
 	query := `SELECT uid, nickname, email, passwd, status, created_at, updated_at FROM users WHERE uid = $1`
 
 	err := db.QueryRow(context.Background(), query, uid).Scan(
+		&user.UID,
+		&user.Nickname,
+		&user.Email,
+		&user.Password,
+		&user.Status,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			return user, fmt.Errorf("usuário não encontrado")
+		}
+		return user, fmt.Errorf("erro ao buscar usuário: %w", err)
+	}
+
+	return user, nil
+}
+
+func GetUserByEmail(email string) (models.User, error) {
+	db := Connect()
+	defer db.Close()
+
+	var user models.User
+	query := `SELECT uid, nickname, email, passwd, status, created_at, updated_at FROM users WHERE email = $1`
+
+	err := db.QueryRow(context.Background(), query, email).Scan(
 		&user.UID,
 		&user.Nickname,
 		&user.Email,

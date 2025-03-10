@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/WagaoCarvalho/backendgoswagger/config"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -18,10 +19,11 @@ const (
 )
 
 var dbPool *pgxpool.Pool
+var configs = config.LoadConfig()
 
 func Connect() *pgxpool.Pool {
 	url := fmt.Sprintf("postgresql://%s:%s@%s:%d/%s?sslmode=%s",
-		user, pass, host, port, dbName, sslMode)
+		configs.Database.User, configs.Database.Pass, host, port, configs.Database.DbName, sslMode)
 
 	// Configura o pool de conexões
 	config, err := pgxpool.ParseConfig(url)

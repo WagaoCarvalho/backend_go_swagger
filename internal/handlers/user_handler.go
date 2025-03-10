@@ -42,7 +42,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Recupera o usuário com o ID
-	user, err := repositories.GetUser(uid)
+	user, err := repositories.GetUserById(uid)
 	if err != nil {
 		utils.ErrorResponse(w, err, http.StatusNotFound)
 		return
