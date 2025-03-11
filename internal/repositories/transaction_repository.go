@@ -63,9 +63,8 @@ func NewTransaction(transaction models.Transaction) (int64, error) {
 	if err != nil {
 		return 0, fmt.Errorf("erro ao iniciar transação: %w", err)
 	}
-	defer tx.Rollback(ctx) // Garantir rollback em caso de falha
+	defer tx.Rollback(ctx)
 
-	// Debitar do remetente
 	debitQuery := `
 		UPDATE wallets 
 		SET balance = balance - $1
@@ -82,7 +81,6 @@ func NewTransaction(transaction models.Transaction) (int64, error) {
 		return 0, fmt.Errorf("erro ao debitar carteira: %w", err)
 	}
 
-	// Creditar ao destinatário
 	creditQuery := `
 		UPDATE wallets 
 		SET balance = balance + $1
@@ -98,7 +96,6 @@ func NewTransaction(transaction models.Transaction) (int64, error) {
 		return 0, fmt.Errorf("erro ao creditar carteira: %w", err)
 	}
 
-	// Registra a transação
 	insertQuery := `
 		INSERT INTO transactions (origin, destination, amount, message, created_at) 
 		VALUES ($1, $2, $3, $4, NOW()) 
@@ -110,7 +107,6 @@ func NewTransaction(transaction models.Transaction) (int64, error) {
 		return 0, fmt.Errorf("erro ao registrar transação: %w", err)
 	}
 
-	// Confirma a transação apenas se tudo ocorrer bem
 	if err := tx.Commit(ctx); err != nil {
 		return 0, fmt.Errorf("erro ao confirmar transação: %w", err)
 	}

@@ -6,14 +6,20 @@ import (
 	"net/http"
 
 	"github.com/WagaoCarvalho/backendgoswagger/cmd/http/routes"
+	"github.com/WagaoCarvalho/backendgoswagger/config"
 	"github.com/WagaoCarvalho/backendgoswagger/internal/repositories"
 )
 
 func main() {
-	port := "3000"
+	configs := config.LoadConfig()
+	port := configs.ServerPort
+	if port == "" {
+		port = "5000"
+	}
+
 	repositories.TestConnection()
-	fmt.Printf("Api running in port %s\n", port)
+	fmt.Printf("API running on port %s\n", port)
+
 	r := routes.NewRouter()
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", port), r))
-
 }

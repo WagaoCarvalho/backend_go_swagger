@@ -18,10 +18,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		utils.ErrorResponse(w, err, http.StatusUnauthorized)
 		return
 	}
-	user, err = auth.SignIn(user)
+
+	authResponse, err := auth.SignIn(user) // Captura corretamente a estrutura `Auth`
 	if err != nil {
 		utils.ErrorResponse(w, err, http.StatusUnauthorized)
 		return
 	}
-	utils.ToJson(w, user)
+
+	utils.ToJson(w, authResponse) // Retorna `auth.Auth`, que inclui o token JWT
 }
