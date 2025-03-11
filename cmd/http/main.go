@@ -12,7 +12,7 @@ import (
 
 func main() {
 	configs := config.LoadConfig()
-	port := configs.ServerPort
+	port := configs.Server.Port
 	if port == "" {
 		port = "5000"
 	}

@@ -2,7 +2,7 @@ package routes
 
 import (
 	"github.com/WagaoCarvalho/backendgoswagger/internal/handlers"
-	"github.com/WagaoCarvalho/backendgoswagger/middlewares"
+	"github.com/WagaoCarvalho/backendgoswagger/internal/middlewares"
 	"github.com/gorilla/mux"
 )
 
